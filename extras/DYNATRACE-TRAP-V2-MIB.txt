@@ -1,0 +1,718 @@
+DYNATRACE-TRAP-V2-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	enterprises,
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE,
+	Unsigned32,
+	TimeTicks
+		FROM SNMPv2-SMI
+	OBJECT-GROUP,
+	NOTIFICATION-GROUP,
+	MODULE-COMPLIANCE
+		FROM SNMPv2-CONF;
+
+dynaTraceMib MODULE-IDENTITY
+	LAST-UPDATED "201304180000Z"	-- April 18, 2013 12:00:00 AM
+	ORGANIZATION "Compuware Austria"
+	CONTACT-INFO
+		"email: info@compuware.com"
+	DESCRIPTION
+		"SNMP Action Plugin V2"
+	::= { enterprises 31094 }
+
+-- START FIELD DEFINITIONS --
+-- dynaTrace OBJECT IDENTIFIER 
+--	::= { dynaTraceMib 1 }
+
+incident OBJECT IDENTIFIER 
+	::= { dynaTraceMib 1 }
+
+name OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The name of the incident."
+	::= { incident 1 }
+
+
+message OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The message of the incident."
+	::= { incident 2 }
+
+
+description OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The description of the incident."
+	::= { incident 3 }
+
+
+severity OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The severity of the incident."
+	::= { incident 4 }
+
+
+key OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The key of the incident as UUID."
+	::= { incident 5 }
+
+
+server OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The server which triggered the incident."
+	::= { incident 6 }
+
+
+systemprofile OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The system profile which triggered the incident."
+	::= { incident 7 }
+
+
+starttime OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The start time of the incident."
+	::= { incident 8 }
+
+
+endtime OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The end time of the incident."
+	::= { incident 9 }
+
+	
+duration OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The duration of the incident."
+	::= { incident 10 }
+
+recordedsessionid OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The recorded session id."
+	::= { incident 11 }
+
+recordedsessionname OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The recorded session name."
+	::= { incident 12 }
+	
+sensitivity OBJECT IDENTIFIER 
+	::= { incident 13 }
+
+type OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The type of the sensitivity."
+	::= { sensitivity 1 }
+
+minimumincidentduration OBJECT-TYPE
+	SYNTAX  TimeTicks
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The minimum duration threshold to be violated until an incident is raised."
+	::= { sensitivity 2 }	
+
+minimumcooldownduration OBJECT-TYPE
+	SYNTAX  TimeTicks
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The minimum duration until another incident is raised."
+	::= { sensitivity 3 }	
+	
+minimumnonviolatedduration OBJECT-TYPE
+	SYNTAX  TimeTicks
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The minimum duration of threshold compliance which causes an incident to close."
+	::= { sensitivity 4 }	
+	
+violationTable OBJECT-TYPE
+	SYNTAX  SEQUENCE OF ViolationEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION "Table that is used to represent the violations of the incident."
+	::= { incident 14 }
+
+violationEntry OBJECT-TYPE
+	SYNTAX  ViolationEntry
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION "Entry of the violation table."
+	INDEX {
+		violationIndex
+		}
+	::= { violationTable 1 }
+
+ViolationEntry ::= SEQUENCE {
+	violationIndex Unsigned32,
+	violationthreshold OCTET STRING
+	}
+
+violationIndex OBJECT-TYPE
+	SYNTAX  Unsigned32
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION "Index of the violation, i.e. index 1 represents the the first violation."
+	::= { violationEntry 1 }
+
+violationthreshold OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The threshold that has been violated."
+	::= { violationEntry 2 }
+
+measureTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF MeasureEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "A table representing the measures of a violation."
+    ::= { incident 15 }
+
+measureEntry OBJECT-TYPE
+    SYNTAX       MeasureEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "A measure entry in the the measure table."
+    INDEX        { violationIndex,
+                   measureIndex }
+    ::= { measureTable 1 }
+
+MeasureEntry ::= SEQUENCE {
+    measureIndex					Unsigned32,
+    measurename						OCTET STRING,	  
+    measuredescription				OCTET STRING,	  
+    measureapplication				OCTET STRING,	  
+    measureconfigurationsummary		OCTET STRING,	  
+    measureunit						OCTET STRING,	  
+    measuremetricname				OCTET STRING,
+	measuremetricdescription		OCTET STRING,
+    measuremetricgroup				OCTET STRING,	  
+    measuremetricunit				OCTET STRING,	
+    measureupperseverethreshold		OCTET STRING,	
+    measureupperwarningthreshold	OCTET STRING,	
+    measurelowerseverethreshold		OCTET STRING,	
+    measurelowerwarningthreshold	OCTET STRING,
+	measuresourcetype 				OCTET STRING,
+	agentsourcename 				OCTET STRING,
+	agentsourcehost 				OCTET STRING,
+	monitorsourcename 				OCTET STRING
+    }
+
+measureIndex OBJECT-TYPE
+	SYNTAX  	Unsigned32
+	MAX-ACCESS 	not-accessible
+	STATUS  	current
+	DESCRIPTION "Index of the measure, there is only one measure per violation. So the index is one at max."
+	::= { measureEntry 1 }
+
+measurename OBJECT-TYPE
+	SYNTAX  	OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The name of the measure."
+	::= { measureEntry 2 }
+
+measuredescription OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The description of the measure."
+	::= { measureEntry 3 }
+
+measureapplication OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The mapped application for the measure."
+	::= { measureEntry 4 }
+
+measureconfigurationsummary OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The configuration of the measure."
+	::= { measureEntry 5 }
+
+measureunit OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The unit of the measure."
+	::= { measureEntry 6 }
+
+measuremetricname OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The name of the measure metric."
+	::= { measureEntry 7 }
+	
+measuremetricdescription OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The description of the measure metric."
+	::= { measureEntry 8 }
+
+measuremetricgroup OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The group of the measure metric."
+	::= { measureEntry 9 }
+
+measuremetricunit OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"The unit of the measure metric."
+	::= { measureEntry 10 }
+
+measureupperseverethreshold OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Threshold that triggers an upper severe exceeding."
+	::= { measureEntry 11 }
+
+measureupperwarningthreshold OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Threshold that triggers an upper warning exceeding."
+	::= { measureEntry 12 }
+
+measurelowerseverethreshold OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Threshold that triggers an lower severe exceeding."
+	::= { measureEntry 13 }
+
+measurelowerwarningthreshold OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Threshold that triggers an lower warning exceeding."
+	::= { measureEntry 14 }
+
+measuresourcetype OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Source type of the measure."
+	::= { measureEntry 15 }
+
+agentsourcename OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Name of the agent that is the source of the measure."
+	::= { measureEntry 16 }
+
+agentsourcehost OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Host of the agent that is the source of the measure."
+	::= { measureEntry 17 }
+
+monitorsourcename OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Name of the monitor that is the source of the measure."
+	::= { measureEntry 18 }
+	
+measureAgentGroupTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF MeasureAgentGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table containing the agent groups that are the sources of the measure."
+    ::= { incident 16 }
+
+measureAgentGroupEntry OBJECT-TYPE
+    SYNTAX       MeasureAgentGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Agent group that is a source of the measure."
+    INDEX        { 	violationIndex,
+					measureIndex,
+					measureAgentGroupIndex
+					}
+    ::= { measureAgentGroupTable 1 }
+	
+MeasureAgentGroupEntry ::= SEQUENCE {
+    measureAgentGroupIndex	Unsigned32,
+    measureagentgroupname	OCTET STRING
+    }
+
+measureAgentGroupIndex OBJECT-TYPE
+	SYNTAX  	Unsigned32
+	MAX-ACCESS 	not-accessible
+	STATUS  	current
+	DESCRIPTION 
+		"Index of the agent group contained in the measureAgentGroupTable."
+	::= { measureAgentGroupEntry 1 }
+	
+measureagentgroupname OBJECT-TYPE
+	SYNTAX  	OCTET STRING
+	MAX-ACCESS 	read-only
+	STATUS  	current
+	DESCRIPTION
+		"Name of the agent group."
+	::= { measureAgentGroupEntry 2 }
+
+splittingTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF SplittingEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table containing the splittings (e.g., business transaction groups) for this measure."
+    ::= { incident 17 }
+
+splittingEntry OBJECT-TYPE
+    SYNTAX       SplittingEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Splitting as an entry of the splitting table."
+    INDEX        { 	violationIndex,
+					measureIndex,
+					splittingIndex
+					}
+    ::= { splittingTable 1 }
+
+SplittingEntry ::= SEQUENCE {
+    splittingIndex	Unsigned32,
+    splittingname	OCTET STRING
+    }
+	
+splittingIndex OBJECT-TYPE
+	SYNTAX  	Unsigned32
+	MAX-ACCESS 	not-accessible
+	STATUS  	current
+	DESCRIPTION "Index of the splitting, i.e. the splitting with the index 1 is the frist splitting."
+	::= { splittingEntry 1 }
+	
+splittingname OBJECT-TYPE
+	SYNTAX  	OCTET STRING
+	MAX-ACCESS 	read-only
+	STATUS  	current
+	DESCRIPTION
+		"Name of the splitting."
+	::= { splittingEntry 2 }
+
+triggerValueTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF TriggerValueEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table representing the trigger values of the violation."
+    ::= { incident 18 }
+
+triggerValueEntry OBJECT-TYPE
+    SYNTAX       TriggerValueEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Trigger value entry within the trigger value table."
+    INDEX        { 	violationIndex,
+					triggerValueIndex
+					}
+    ::= { triggerValueTable 1 }
+	
+TriggerValueEntry ::= SEQUENCE {
+    triggerValueIndex	Unsigned32,
+    triggervalue	OCTET STRING,
+	triggermeasuresourcetype OCTET STRING,
+	triggeragentsourcename 	 OCTET STRING,
+	triggeragentsourcehost 	 OCTET STRING,
+	triggermonitorsourcename OCTET STRING
+    }
+
+triggerValueIndex OBJECT-TYPE
+	SYNTAX  	Unsigned32
+	MAX-ACCESS 	not-accessible
+	STATUS  	current
+	DESCRIPTION "Index of the trigger value entry."
+	::= { triggerValueEntry 1 }
+	
+triggervalue OBJECT-TYPE
+	SYNTAX  	OCTET STRING
+	MAX-ACCESS 	read-only
+	STATUS  	current
+	DESCRIPTION
+		"The actual trigger value."
+	::= { triggerValueEntry 2 }
+
+triggermeasuresourcetype OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Source type of the violation."
+	::= { triggerValueEntry 3 }
+	
+triggeragentsourcename OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Name of the agent that is the source of the violation."
+	::= { triggerValueEntry 4 }
+
+triggeragentsourcehost OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Host of the agent that is the source of the violation."
+	::= { triggerValueEntry 5 }
+
+triggermonitorsourcename OBJECT-TYPE
+	SYNTAX  OCTET STRING
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Name of the monitor that is the source of the violation."
+	::= { triggerValueEntry 6 }
+
+triggerAgentGroupTable OBJECT-TYPE
+    SYNTAX       SEQUENCE OF TriggerAgentGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Table containing the agent groups that are the sources of the violation."
+    ::= { incident 19 }
+
+triggerAgentGroupEntry OBJECT-TYPE
+    SYNTAX       TriggerAgentGroupEntry
+    MAX-ACCESS   not-accessible
+    STATUS       current
+    DESCRIPTION  "Agent group that is a source of the measure."
+    INDEX        { 	violationIndex,
+					triggerValueIndex,
+					triggerAgentGroupIndex
+					}
+    ::= { triggerAgentGroupTable 1 }
+	
+TriggerAgentGroupEntry ::= SEQUENCE {
+    triggerAgentGroupIndex	Unsigned32,
+    triggeragentgroupname	OCTET STRING
+    }
+
+triggerAgentGroupIndex OBJECT-TYPE
+	SYNTAX  	Unsigned32
+	MAX-ACCESS 	not-accessible
+	STATUS  	current
+	DESCRIPTION "Index of the agent group contained in the triggerAgentGroupTable."
+	::= { triggerAgentGroupEntry 1 }
+	
+triggeragentgroupname OBJECT-TYPE
+	SYNTAX  	OCTET STRING
+	MAX-ACCESS 	read-only
+	STATUS  	current
+	DESCRIPTION
+		"Name of the agent group."
+	::= { triggerAgentGroupEntry 2 }
+	
+-- STOP FIELD DEFINITIONS --
+dynaTraceTrapNotification OBJECT IDENTIFIER 
+	::= { dynaTraceMib 0 }
+
+--dynaTraceObjects OBJECT IDENTIFIER ::= { dynaTraceMib 2 }
+-- START CONFORMANCE INFO --
+dynaTraceConformance OBJECT IDENTIFIER 
+	::= { dynaTraceMib 2 }
+
+dynaTraceCompliances OBJECT IDENTIFIER 
+	::= { dynaTraceConformance 1 }
+
+dynaTraceGroups OBJECT IDENTIFIER 
+	::= { dynaTraceConformance 2 }
+
+-- END CONFORMANCE INFO ---- START TRAP DEFINITION
+
+dynaTraceIncidentStart NOTIFICATION-TYPE
+	OBJECTS {
+		name,
+		message,
+		description,
+		severity,
+		key,
+		server,
+		systemprofile,
+		starttime,
+		recordedsessionid,
+		recordedsessionname,
+		type,
+		minimumincidentduration,
+		minimumcooldownduration,
+		minimumnonviolatedduration
+		}
+	STATUS  current
+	DESCRIPTION
+		"Indicates, that a new dynaTrace incident has begun."
+	::= { dynaTraceTrapNotification 1 }
+
+
+dynaTraceIncidentEnd NOTIFICATION-TYPE
+	OBJECTS {
+		name,
+		message,
+		description,
+		severity,
+		key,
+		server,
+		systemprofile,
+		starttime,
+		endtime,
+		duration,
+		recordedsessionid,
+		recordedsessionname,
+		type,
+		minimumincidentduration,
+		minimumcooldownduration,
+		minimumnonviolatedduration
+		}
+	STATUS  current
+	DESCRIPTION
+		"Indicates, that a dynaTrace incident has ended."
+	::= { dynaTraceTrapNotification 2 }
+
+-- END TRAP DEFINITION ---- Compliance statements
+
+dynaTraceCompliance MODULE-COMPLIANCE
+	STATUS  current
+	DESCRIPTION
+		"The compliance statement for SNMP entities which implement
+		this MIB."
+
+	MODULE 
+	MANDATORY-GROUPS {
+			dynaTraceNotificationGroup,
+			dynaTraceDataGroup }
+	::= { dynaTraceCompliances 1 }
+
+-- START MIB GROUPINGS --
+dynaTraceDataGroup OBJECT-GROUP
+	OBJECTS {
+		name,
+		message,
+		description,
+		severity,
+		key,
+		server,
+		systemprofile,
+		starttime,
+		endtime,
+		duration,
+		recordedsessionid,
+		recordedsessionname,
+		type,
+		minimumincidentduration,
+		minimumcooldownduration,
+		minimumnonviolatedduration,
+		violationthreshold,
+		measurename,	  	  
+		measureapplication,	  
+		measuredescription,	  
+		measureconfigurationsummary,	  
+		measureunit,	  
+		measuremetricname,	
+		measuremetricdescription,
+		measuremetricgroup,	  
+		measuremetricunit,	
+		measureupperseverethreshold,	
+		measureupperwarningthreshold,	
+		measurelowerseverethreshold,	
+		measurelowerwarningthreshold,
+		measuresourcetype,
+		agentsourcename,
+		agentsourcehost,
+		monitorsourcename,
+		measureagentgroupname,
+		splittingname,
+		triggervalue,
+		triggermeasuresourcetype,
+		triggeragentsourcename,
+		triggeragentsourcehost,
+		triggermonitorsourcename,
+		triggeragentgroupname
+		}
+	STATUS  current
+	DESCRIPTION
+		"The collection of objects which are used to represent the
+		common parameters of the headend managed entities."
+	::= { dynaTraceGroups 1 }
+
+dynaTraceNotificationGroup NOTIFICATION-GROUP
+	NOTIFICATIONS {
+		dynaTraceIncidentStart,
+		dynaTraceIncidentEnd }
+	STATUS  current
+	DESCRIPTION
+		"The collection of notifications used by the headend agent
+		to report the exceptional conditions to the management
+		application."
+	::= { dynaTraceGroups 2 }
+
+END

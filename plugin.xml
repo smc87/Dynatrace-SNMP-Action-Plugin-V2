@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+    <extension 
+            id="com.dynatrace.diagnostics.plugins.snmp.SnmpActionPluginV2"
+            point="com.dynatrace.diagnostics.pdk.pluginconfig"
+            name="SNMP Action Plugin V2">
+        <information>
+			  <supportlevel value="supported"/>
+			  <license value="dynatraceBSD.txt" />
+            <description value="The SNMP Plugin sends notifications via SNMP." />
+        </information>
+        <configuration>
+            <property label="Target Host" type="string" key="host" default="localhost" 
+                    description="The target host to send SNMP TRAPs to." />
+            <property label="Target Port" type="long" key="port" default="162" 
+                    description="The target port to SNMP TRAPs to." />
+            <property label="SNMP Version" type="list" key="version" default="SNMPv2c" 
+                    description="The SNMP version to use for TRAPs.">
+                <list>
+                    <item value="SNMPv2c" />
+                </list>
+            </property>
+            <property label="Community" type="list" key="community" default="public" 
+                    description="The community string to use for SNMP TRAPs.">
+                <list>
+                    <item value="public" />
+                    <item value="private" />
+                </list>
+            </property>
+            <property label="Maximum Number of Message Octets" type="long" key="octets" default="1472" 
+                    description="Maximum number of octets in the SNMP message" />
+            <property label="Suppress parent incident violations" type="boolean" key="suppressParent" default="false" 
+                    description="If the incident source is all-agents do not send alert." />
+       </configuration>
+    </extension>
+    <extension
+            id="com.dynatrace.diagnostics.plugins.snmp.SnmpActionV2"
+            point="com.dynatrace.diagnostics.pdk.action"
+            name="SNMP Action V2">
+        <plugin class="com.dynatrace.diagnostics.plugins.snmp.SnmpActionV2"
+            configid="com.dynatrace.diagnostics.plugins.snmp.SnmpActionPluginV2" />
+    </extension>
+</plugin>
